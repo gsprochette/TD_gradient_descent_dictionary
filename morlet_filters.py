@@ -45,19 +45,13 @@ def periodize_filter_fourier(filt, nperiods):
         Aliased version of filt
     """
 
-    assert nperiods%2 == 1
-    P = (nperiods+1) // 2
-    direction = -1 if P%2==0 else 1
-    
     true_size = np.size(filt) // nperiods
-    periodic_filt = np.zeros(true_size)
-    for period in range(nperiods):
-        start = period*true_size
-        end = start + true_size
-        fourier_slice = filt[start:end]
-        periodic_filt = periodic_filt + fourier_slice[::direction]
-        direction *= -1
-    return periodic_filt
+    if nperiods%2 == 0:
+        filt = np.roll(filt, true_size // 2)
+
+    filt = np.split(filt, nperiods)
+    filt = np.sum(filt, axis=0)
+    return filt
 
 
 def morlet_1d(N, xi, Q, P=5, eps=1e-7):
